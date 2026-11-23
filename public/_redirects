@@ -1,0 +1,2 @@
+# The production build generates explicit rewrites for all prerendered pages.
+/* /404.html 404

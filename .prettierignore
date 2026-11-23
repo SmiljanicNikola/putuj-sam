@@ -1,0 +1,8 @@
+node_modules
+dist
+.prerender
+test-results
+playwright-report
+package-lock.json
+public/images
+public/licenses

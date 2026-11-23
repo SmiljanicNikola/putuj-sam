@@ -1,0 +1,39 @@
+# Apache / LiteSpeed / Namecheap shared hosting. Upload with the rest of dist/.
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+RewriteEngine On
+
+# SSL is active for both production hostnames. Keep HTTPS and the canonical
+# hostname, while allowing certificate validation over HTTP.
+RewriteCond %{REQUEST_URI} !^/\.well-known/(acme-challenge|pki-validation)(/|$) [NC]
+RewriteCond %{HTTP_HOST} ^(?:www\.)?putujsam\.com(?::[0-9]+)?$ [NC]
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} ^www\.putujsam\.com(?::[0-9]+)?$ [NC]
+RewriteRule ^ https://putujsam.com%{REQUEST_URI} [R=301,L,NE]
+
+# Redirect browser requests for generated HTML to their canonical clean URLs.
+# THE_REQUEST prevents internal HTML rewrites from triggering these redirects.
+RewriteCond %{THE_REQUEST} \s/+index\.html(?:[?\s]) [NC]
+RewriteRule ^index\.html$ / [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+[^?\s]+\.html(?:[?\s]) [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^(?!404\.html$)(.+)\.html$ /$1 [R=301,L,NE]
+
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.+)/$ /$1 [R=301,L,NE]
+
+# Serve assets and the error document directly.
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteRule ^$ index.html [L]
+
+# Serve each prerendered page, preserving its content and search metadata.
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(?!404$)(.+)$ $1.html [L]
+
+# Missing pages and assets must return HTTP 404, not the homepage.
+RewriteRule ^ - [R=404,L]
